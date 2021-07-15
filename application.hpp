@@ -21,7 +21,7 @@ public:
 	Camera* camera;
 	Grid* grid;
 	ShaderManager *shaderMan;
-	RenderObject *triangle;
+	RenderObject *rectangle;
 	Arrow *xAxis, *yAxis, *zAxis;
 public:
 	Application();
@@ -29,6 +29,7 @@ public:
 public:
 	void render();
 	void update();
+	GLFWkeyfun keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
 private:
 	void initialiseGLFW();
 	void initialiseOpenGL();
