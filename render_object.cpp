@@ -59,9 +59,9 @@ RenderObject::~RenderObject() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteVertexArrays(1, &vertexArray);
 }
-void RenderObject::render(GLuint indexOffset, GLuint indexCount) {
+void RenderObject::render(GLenum mode, GLuint indexOffset, GLuint indexCount) {
     glBindVertexArray(vertexArray);
-    glDrawElements(GL_TRIANGLES, indexCount == 0 ? indexBufferSize : indexCount,
+    glDrawElements(mode, indexCount == 0 ? indexBufferSize : indexCount,
         GL_UNSIGNED_INT, reinterpret_cast<void*>(indexOffset * sizeof(GLuint)));
 }
 void RenderObject::updateIndices(std::vector<GLuint>& indices) {

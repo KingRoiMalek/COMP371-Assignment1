@@ -23,6 +23,7 @@ public:
 public:
 	GLint getUniformLocation(std::string const& uniformName, std::string const& programName, GLuint program);
 	void setUniform(std::string const& uniformName, std::string const& programName, glm::mat4 value);
+	void setUniform(std::string const& uniformName, std::string const& programName, glm::vec4 value);
 	void setUniform(std::string const& uniformName, std::string const& programName, GLint value);
 	void setUniform(std::string const& uniformName, std::string const& programName, GLfloat value);
 private:

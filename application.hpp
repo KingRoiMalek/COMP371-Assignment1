@@ -2,9 +2,12 @@
 
 #include <GLFW/glfw3.h>
 
+#include "camera.hpp"
+#include "grid.hpp"
 #include "render_object.hpp"
 #include "scheduler.hpp"
 #include "shader_manager.hpp"
+#include "arrow.hpp"
 
 class Application {
 public:
@@ -15,15 +18,17 @@ public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;
 public:
+	Camera* camera;
+	Grid* grid;
 	ShaderManager *shaderMan;
 	RenderObject *triangle;
+	Arrow *xAxis, *yAxis, *zAxis;
 public:
 	Application();
 	~Application();
 public:
 	void render();
 	void update();
-	void updateUniforms();
 private:
 	void initialiseGLFW();
 	void initialiseOpenGL();

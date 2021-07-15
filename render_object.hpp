@@ -19,7 +19,7 @@ public:
     RenderObject(std::initializer_list<OGLVertexAttribute> attributes);
     ~RenderObject();
 public:
-    void render(GLuint indexOffset = 0, GLuint indexCount = 0);
+    void render(GLenum mode = GL_TRIANGLES, GLuint indexOffset = 0, GLuint indexCount = 0);
 public:
     void updateIndices(std::vector<GLuint>& indices);
     void updateVertices(std::vector<GLfloat>& vertices);

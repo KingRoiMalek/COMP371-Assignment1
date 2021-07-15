@@ -146,8 +146,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="arrow.cpp" />
+    <ClCompile Include="arrow.hpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="grid.cpp" />
     <ClCompile Include="render_object.cpp" />
     <ClCompile Include="scheduler.cpp" />
     <ClCompile Include="shader_manager.cpp" />
@@ -155,6 +159,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.hpp" />
+    <ClInclude Include="camera.hpp" />
+    <ClInclude Include="grid.hpp" />
     <ClInclude Include="render_object.hpp" />
     <ClInclude Include="scheduler.hpp" />
     <ClInclude Include="shader_manager.hpp" />
