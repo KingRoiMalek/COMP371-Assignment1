@@ -4,5 +4,5 @@
 
 class Cube {
 public:
-	static glm::vec3 * generateCube();
+	static int generateCube();
 };
