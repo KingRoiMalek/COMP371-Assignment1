@@ -14,6 +14,7 @@ public:
 	double const UPDATE_INTERVAL = 1.0 / 30.0;
 	int const WINDOW_SIZE[2] = {1024, 768};
 	char const* WINDOW_TITLE = "COMP371	Assignment #1";
+	double lastMousePosX, lastMousePosY;
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;
@@ -29,6 +30,7 @@ public:
 public:
 	void render();
 	void update();
+	void processInput(GLFWwindow* window);
 private:
 	void initialiseGLFW();
 	void initialiseOpenGL();

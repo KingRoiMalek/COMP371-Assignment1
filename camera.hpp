@@ -10,6 +10,8 @@ const float M_PI = glm::pi<float>();
 class Camera {
 public:
 	glm::vec3 const WORLD_UP = glm::vec3(0, 1, 0);
+	float const ANGULAR_SPEED = 60.0f;
+	float const ZOOM_SPEED = 100;
 public:
 	glm::vec3 forward = glm::vec3(0, 0, 0);
 	glm::vec3 position = glm::vec3(0, 1, 5);
