@@ -2,16 +2,15 @@
 
 #include "arrow.hpp"
 
-Arrow::Arrow(GLfloat length, glm::vec2 orientation) : RenderObject({ OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE) }) {
-	this->orientation = orientation;
-	glm::vec3 offset;
-	offset.x = glm::sin(orientation.y) * glm::sin(orientation.x);
-	offset.y = glm::cos(orientation.y);
-	offset.z = glm::sin(orientation.y) * glm::cos(orientation.x);
-	offset *= length;
-	glm::vec3 tip = origin + offset;
-	std::vector<GLfloat> vertices = {origin.x, origin.y, origin.z, tip.x, tip.y, tip.z};
-	std::vector<GLuint> indices = {0, 1};
+Arrow::Arrow(glm::vec4 color, GLfloat length) : RenderObject({ OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE), OGLVertexAttribute(1, 4, GL_FLOAT, GL_FALSE) }) {
+	std::vector<GLfloat> vertices = {
+		0, 0, 0, color.x, color.y, color.z, color.w,
+		0, 0, length, color.x, color.y, color.z, color.w,
+		0.1f, 0, length - 0.2f, color.x, color.y, color.z, color.w,
+		-0.1f, 0, length - 0.2f, color.x, color.y, color.z, color.w
+	};
+
+	std::vector<GLuint> indices = {0, 1, 1, 2, 1, 3};
 	updateVertices(vertices);
 	updateIndices(indices);
 }

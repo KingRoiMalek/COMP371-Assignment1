@@ -1,6 +1,6 @@
 #include "grid.hpp"
 
-Grid::Grid(int width, int height, GLfloat sideLength) : RenderObject({ OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE) }) {
+Grid::Grid(int width, int height, GLfloat sideLength, glm::vec4 color) : RenderObject({ OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE), OGLVertexAttribute(1, 4, GL_FLOAT, GL_FALSE) }) {
 	std::vector<GLfloat> vertices;
 	std::vector<GLuint> indices;
 	GLuint indexOffset = 0;
@@ -9,7 +9,13 @@ Grid::Grid(int width, int height, GLfloat sideLength) : RenderObject({ OGLVertex
 			GLfloat x = ((GLfloat)i - (GLfloat)width / 2.0f) * sideLength + position.x;
 			GLfloat y = position.y;
 			GLfloat z = ((GLfloat)j - (GLfloat)height / 2.0f) * sideLength  + position.z;
-			GLfloat ii[] = { x, y, z, x, y, z + 1.0f, x + 1.0f, y, z + 1.0f, x + 1.0f, y, z };
+			GLfloat ii[] = { 
+				x, y, z, color.x, color.y, color.z, color.w,
+				x, y, z + 1.0f, color.x, color.y, color.z, color.w,
+				x + 1.0f, y, z + 1.0f, color.x, color.y, color.z, color.w,
+				x + 1.0f, y, z, color.x, color.y, color.z, color.w
+			};
+
 			vertices.insert(vertices.end(), std::begin(ii), std::end(ii));
 			GLuint jj[] = { indexOffset, indexOffset + 1, indexOffset + 1, indexOffset + 2, indexOffset + 2, indexOffset + 3, indexOffset + 3, indexOffset};
 			indices.insert(indices.end(), std::begin(jj), std::end(jj));

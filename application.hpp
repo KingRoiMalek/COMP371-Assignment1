@@ -2,12 +2,13 @@
 
 #include <GLFW/glfw3.h>
 
+#include "arrow.hpp"
 #include "camera.hpp"
+#include "cluster.hpp"
+#include "cube.hpp"
 #include "grid.hpp"
-#include "render_object.hpp"
 #include "scheduler.hpp"
 #include "shader_manager.hpp"
-#include "arrow.hpp"
 
 class Application {
 public:
@@ -21,8 +22,12 @@ public:
 	Camera* camera;
 	Grid* grid;
 	ShaderManager *shaderMan;
-	RenderObject *triangle;
+	Cube *cube;
 	Arrow *xAxis, *yAxis, *zAxis;
+public:
+	glm::vec2 worldRotation = glm::vec2(0, 0);
+	Cluster clusters[5];
+	int currentCluster = 0;
 public:
 	Application();
 	~Application();
