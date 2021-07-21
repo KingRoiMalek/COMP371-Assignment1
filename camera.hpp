@@ -10,6 +10,8 @@ const float M_PI = glm::pi<float>();
 class Camera {
 public:
 	glm::vec3 const WORLD_UP = glm::vec3(0, 1, 0);
+	double const ZOOM_SPEED = 80.0f;
+	double const MOUSE_SENSITIVITY = 0.05f;
 public:
 	glm::vec3 forward = glm::vec3(0, 0, 0);
 	glm::vec3 position = glm::vec3(0, 1, 5);
@@ -28,5 +30,6 @@ public:
 	~Camera();
 public:
 	void setRotation(glm::vec2 rotation);
+	void rotate(glm::vec2 mouseDelta);
 	void update(double currentTime);
 };

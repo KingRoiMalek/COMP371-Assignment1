@@ -19,6 +19,7 @@ public:
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;
+	glm::dvec2 lastMousePos = glm::dvec2(0, 0);
 public:
 	Camera* camera;
 	Grid* grid;
@@ -34,6 +35,7 @@ public:
 	Application();
 	~Application();
 public:
+	void handleMouse();
 	void render();
 	void update();
 private:

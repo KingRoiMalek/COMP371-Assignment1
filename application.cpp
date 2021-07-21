@@ -32,6 +32,7 @@ void Application::initialiseGLFW() {
 	glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window, handleInput);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 void Application::initialiseOpenGL() {
 	printf("Initialising OpenGL\n");
@@ -71,17 +72,20 @@ void Application::initialiseScene() {
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Application* application = (Application*) glfwGetWindowUserPointer(window);
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
 	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		application->worldRotation.x += glm::radians(5.0f);
+		application->worldRotation.x += glm::radians(10.0f);
 	}
 	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-		application->worldRotation.x -= glm::radians(5.0f);
+		application->worldRotation.x -= glm::radians(10.0f);
 	}
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-		application->worldRotation.y += glm::radians(5.0f);
+		application->worldRotation.y += glm::radians(10.0f);
 	}
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-		application->worldRotation.y -= glm::radians(5.0f);
+		application->worldRotation.y -= glm::radians(10.0f);
 	}
 	if (key == GLFW_KEY_HOME && action == GLFW_PRESS) {
 		application->worldRotation = glm::vec2(0, 0);
@@ -125,6 +129,23 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		application->wall = new Wall(&application->clusters[0]);
 	}
 }
+void Application::handleMouse() {
+	glm::dvec2 mousePos;
+	glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
+	glm::dvec2 delta = mousePos - lastMousePos;
+	double zoomFactor = glm::distance(glm::dvec2(0), mousePos) - glm::distance(glm::dvec2(0), lastMousePos);
+	lastMousePos = mousePos;
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		camera->position += camera->forward * (float)(zoomFactor * scheduler.deltaTime * camera->ZOOM_SPEED);
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {
+		delta.x = 0;
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) != GLFW_PRESS) {
+		delta.y = 0;
+	}
+	camera->rotate(delta);
+}
 void Application::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaderMan->useProgram("basic");
@@ -155,6 +176,7 @@ void Application::render() {
 	camera->dirty = false;
 }
 void Application::update() {
+	handleMouse();
 	camera->update(scheduler.currentTime);
 }
 int main(int argc, char const* argv[]) {
