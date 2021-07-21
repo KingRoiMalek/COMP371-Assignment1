@@ -158,6 +158,7 @@
     <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="cluster.cpp" />
     <ClCompile Include="utility.cpp" />
+    <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.hpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="scheduler.hpp" />
     <ClInclude Include="shader_manager.hpp" />
     <ClInclude Include="utility.hpp" />
+    <ClInclude Include="wall.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

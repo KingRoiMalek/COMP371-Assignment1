@@ -15,7 +15,7 @@ Cube::Cube(glm::vec4 color, glm::vec3 position) : RenderObject({ OGLVertexAttrib
 	};
 	std::vector<GLuint> indices = {
 		0, 1, 3, 
-		3, 1, 2,
+		3, 1, 2,   
 		1, 5, 2, 
 		2, 5, 6,
 		5, 4, 6, 

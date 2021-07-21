@@ -2,6 +2,7 @@
 
 #include <glad.h>
 #include <GLFW/glfw3.h>
+#include <time.h>
 
 #include "application.hpp"
 #include "shader_manager.hpp"
@@ -11,6 +12,7 @@ Application::Application() {
 	initialiseGLFW();
 	initialiseOpenGL();
 	initialiseOpenGLShaders();
+	srand(time(NULL));
 	initialiseScene();
 }
 Application::~Application() {
@@ -55,12 +57,13 @@ void Application::initialiseScene() {
 	glm::mat4x4 const projection =
 		glm::perspective(45.0f, ASPECT_RATIO, 0.1f, 1000.0f);
 	camera = new Camera(projection, glm::vec2(glm::radians(-10.0f), 0));
-	cube = new Cube(glm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
 	grid = new Grid(100, 100, 0.5f);
 	xAxis = new Arrow(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 2.5f);
 	yAxis = new Arrow(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 2.5f);
 	zAxis = new Arrow(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 2.5f);
+	clusters = new Cluster[5];
 	clusters[0].setPosition(glm::vec3(0, 0, 0));
+	wall = new Wall(&clusters[0]);
 	clusters[1].setPosition(glm::vec3(25.0f, 0, 25.0f));
 	clusters[2].setPosition(glm::vec3(-25.0f, 0, 25.0f));
 	clusters[3].setPosition(glm::vec3(25.0f, 0, -25.0f));
@@ -114,6 +117,13 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key > GLFW_KEY_1 && key < GLFW_KEY_5 && action == GLFW_PRESS) {
 		application->currentCluster = key - GLFW_KEY_1;
 	}
+	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+		for (int i = 0; i < 5; i += 1) {
+			application->clusters[i].cubes.clear();
+			application->clusters[i].generateCluster();
+		}
+		application->wall = new Wall(&application->clusters[0]);
+	}
 }
 void Application::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -128,8 +138,14 @@ void Application::render() {
 	shaderMan->setUniform("world", "basic", worldRotationMat);
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	grid->render();
-	cube->render();
+	for (int i = 0; i < 5; i += 1) {
+		clusters[i].render(shaderMan);
+	}
+
+	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
+	wall->render();
 	glDisable(GL_DEPTH_TEST);
+	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	zAxis->render();
 	shaderMan->setUniform("object", "basic", glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1.0f, 0)));
 	xAxis->render();

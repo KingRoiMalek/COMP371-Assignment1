@@ -9,6 +9,7 @@
 #include "grid.hpp"
 #include "scheduler.hpp"
 #include "shader_manager.hpp"
+#include "wall.hpp"
 
 class Application {
 public:
@@ -26,8 +27,9 @@ public:
 	Arrow *xAxis, *yAxis, *zAxis;
 public:
 	glm::vec2 worldRotation = glm::vec2(0, 0);
-	Cluster clusters[5];
+	Cluster *clusters;
 	int currentCluster = 0;
+	Wall* wall;
 public:
 	Application();
 	~Application();
