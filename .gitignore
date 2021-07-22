@@ -7,3 +7,4 @@
 *.vbproj.user
 ipch
 *sdf
+/.vs/

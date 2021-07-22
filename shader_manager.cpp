@@ -9,6 +9,7 @@
 #include "shader_manager.hpp"
 #include "utility.hpp"
 
+// This class handles everything from shader creation to uniform setting.
 ShaderManager::ShaderManager() {
     shaders.clear();
     programs.clear();
@@ -18,6 +19,7 @@ ShaderManager::~ShaderManager() {
     deletePrograms();
     deleteShaders();
 }
+// Appends a shader that is stored in a hash map for future bindings.
 void ShaderManager::appendShader(std::string const& name, GLenum type, std::string const& path) {
     auto shaderTypeToString = [](GLenum shaderType) {
         switch (shaderType) {
@@ -108,6 +110,7 @@ void ShaderManager::useProgram(std::string const& name) {
     if (currentProgram != program) glUseProgram(program);
     currentProgram = program;
 }
+// Utility function to fetch and cache uniform locations.
 GLint ShaderManager::getUniformLocation(std::string const& uniformName, std::string const& programName, GLuint program) {
     std::string key = programName + ":" + uniformName;
     auto item = uniforms.find(key);
@@ -121,6 +124,8 @@ GLint ShaderManager::getUniformLocation(std::string const& uniformName, std::str
     uniforms[key] = location;
     return location;
 }
+// Function overloading is very useful in this case. The same function can be used for any and every type of GLM values.
+// And of course, each value may be handled its own way.
 void ShaderManager::setUniform(std::string const& uniformName, std::string const& programName, glm::mat4 value) {
     useProgram(programName);
     GLuint const program = getCurrentProgram();

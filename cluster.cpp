@@ -2,6 +2,9 @@
 
 #include "cluster.hpp"
 
+// The cluster is essentially a collection of cubes following the principles of hierarchical modeling.
+// This allows each cube to be positioned at a distinct offset but also allows every cube to move and rotate
+// with the other cubes of the cluster.
 Cluster::Cluster() {
 	generateCluster();
 }
@@ -14,6 +17,7 @@ Cluster::Cluster(glm::vec3 position, float rotation, float scale) {
 Cluster::~Cluster() {
 	return;
 }
+// Utility function to append a randomly colored cube to the cluster
 void Cluster::appendCube(glm::vec3 offset) {
 	float const R = (float)(rand() % 255) / 255.0f;
 	float const G = (float)(rand() % 255) / 255.0f;
@@ -28,31 +32,41 @@ void Cluster::generateCluster() {
 	glm::vec3 const FORWARD = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 const BACKWARD = glm::vec3(0.0f, 0.0f, -1.0f);
 	float const maxPlaneOffset = 2.0f;
+	// This algorithm randomly generates a cluster of cubes by randomly selecting a cube in the cluster, a face of that cube,
+	// checking if that face has a cube in front of it and finally placing a new cube in the cluster.
 
 	glm::vec3 const offsets[] = { UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD };
 	std::vector<glm::vec3> coordinates = { glm::vec3(0.0f, 0.0f, 0.0f) };
 	appendCube(glm::vec3(0.0f, 0.0f, 0.0f));
 	while (coordinates.size() < 9) {
 		int const coordinateCount = coordinates.size();
+		// Randomly select a cube.
 		glm::vec3 randomCoordinate = coordinates[rand() % coordinateCount];
+		// Place a cube on a randomly selected face of that cube.
 		glm::vec3 newCoordinate = randomCoordinate + offsets[rand() % sizeof offsets / sizeof * offsets];
+		// Check if the new cube goes up the max X length of the cluster.
 		if (newCoordinate.x > maxPlaneOffset || newCoordinate.x < -maxPlaneOffset) {
 			continue;
 		}
+		// Check if the new cube goes up the max Y length of the cluster.
 		if (newCoordinate.y > maxPlaneOffset || newCoordinate.y < -maxPlaneOffset) {
 			continue;
 		}
+		// Check if the new cube is over an already existing cube.
 		if (std::find(coordinates.begin(), coordinates.end(), newCoordinate) != coordinates.end()) {
 			continue;
 		} else {
+			// Add the cube.
 			coordinates.push_back(newCoordinate);
 			appendCube(newCoordinate);
 		}
 	}
 }
 void Cluster::render(ShaderManager* shaderMan) {
+	// Render every cube of the cluster separately.
 	for (Cube *cube : cubes) {
 		const glm::mat4 i = glm::mat4(1.0f);
+		// The order of matrix multiplication matters.
 		glm::mat4 transform = 
 		glm::translate(i, position) * // Step 4: Translate cluster
 		glm::rotate(i, rotation, glm::vec3(0, 1.0f, 0)) * // Step 3: Rotate cluster around y-axis

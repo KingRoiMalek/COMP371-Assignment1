@@ -23,30 +23,38 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 void Application::initialiseGLFW() {
 	printf("Initialising GLFW\n");
 	assertFatal(glfwInit(), "Could not initialise GLFW\n");
+	// Hint the OpenGL version to the window.
 	glfwWindowHint(GLFW_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 	window = glfwCreateWindow(WINDOW_SIZE[0], WINDOW_SIZE[1], WINDOW_TITLE, NULL, NULL);
 	assertFatal(window != NULL, "Could not create window\n");
 	glfwMakeContextCurrent(window);
+	// Let the modifier bitfield mods variable in the key callback to store the state of the CAPS LOCK key and others.
 	glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window, handleInput);
+	// Hide the cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 void Application::initialiseOpenGL() {
 	printf("Initialising OpenGL\n");
-	assertFatal(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Could not load OpenGL\n");
+	assertFatal(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Could not load OpenGL\n");\
+	// Disable VSync to allow for infinite framerate.
 	glfwSwapInterval(0);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
+	// Enable transparency.
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Enable back-face culling.
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 }
 void Application::initialiseOpenGLShaders() {
 	printf("Loading OpenGL shaders\n");
+	// The shader manager creates, handles and deletes every shader and program
+	// and also, provides a simple interface for setting uniforms.
 	shaderMan = new ShaderManager();
 	shaderMan->appendShader("basicVert", GL_VERTEX_SHADER, "resources/shaders/basic.vert");
 	shaderMan->appendShader("basicFrag", GL_FRAGMENT_SHADER, "resources/shaders/basic.frag");
@@ -63,12 +71,11 @@ void Application::initialiseScene() {
 	yAxis = new Arrow(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 2.5f);
 	zAxis = new Arrow(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 2.5f);
 	clusters = new Cluster[5];
-	clusters[0].setPosition(glm::vec3(0, 0, 0));
-	wall = new Wall(&clusters[0]);
-	clusters[1].setPosition(glm::vec3(25.0f, 0, 25.0f));
-	clusters[2].setPosition(glm::vec3(-25.0f, 0, 25.0f));
-	clusters[3].setPosition(glm::vec3(25.0f, 0, -25.0f));
-	clusters[4].setPosition(glm::vec3(-25.0f, 0, -25.0f));
+	walls = new Wall*[5];
+	for (int i = 0; i < 5; i += 1) {
+		clusters[i].setPosition(INITIAL_CLUSTER_POSITIONS[i]);
+		walls[i] = new Wall(&clusters[i], INITIAL_CLUSTER_POSITIONS[i]);
+	}
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Application* application = (Application*) glfwGetWindowUserPointer(window);
@@ -100,6 +107,7 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		application->clusters[application->currentCluster].position.z += 1.0f;
 	}
 	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		// Rotation occurs if the CAPS LOCK key is currently active.
 		if (mods & GLFW_MOD_CAPS_LOCK) {
 			application->clusters[application->currentCluster].position.x -= 1.0f;
 		}
@@ -111,6 +119,7 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		application->clusters[application->currentCluster].position.z -= 1.0f;
 	}
 	if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+		// Rotation occurs if the CAPS LOCK key is currently active.
 		if (mods & GLFW_MOD_CAPS_LOCK) {
 			application->clusters[application->currentCluster].position.x += 1.0f;
 		}
@@ -118,21 +127,23 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 			application->clusters[application->currentCluster].rotation += glm::radians(5.0f);
 		}
 	}
-	if (key > GLFW_KEY_1 && key < GLFW_KEY_5 && action == GLFW_PRESS) {
+	// Because the numerical keys are defined sequentially, this logic can be greatly simplified.
+	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_5 && action == GLFW_PRESS) {
 		application->currentCluster = key - GLFW_KEY_1;
 	}
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
 		for (int i = 0; i < 5; i += 1) {
 			application->clusters[i].cubes.clear();
 			application->clusters[i].generateCluster();
+			application->walls[i] = new Wall(&application->clusters[i], application->INITIAL_CLUSTER_POSITIONS[i]);
 		}
-		application->wall = new Wall(&application->clusters[0]);
 	}
 }
 void Application::handleMouse() {
 	glm::dvec2 mousePos;
 	glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
 	glm::dvec2 delta = mousePos - lastMousePos;
+	// The zoom factor is calculated by subtracting the magnitude of the last position and current position vectors.
 	double zoomFactor = glm::distance(glm::dvec2(0), mousePos) - glm::distance(glm::dvec2(0), lastMousePos);
 	lastMousePos = mousePos;
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
@@ -161,10 +172,13 @@ void Application::render() {
 	grid->render();
 	for (int i = 0; i < 5; i += 1) {
 		clusters[i].render(shaderMan);
+		glm::mat4 wallTransform = glm::translate(glm::mat4(1.0f), walls[i]->position);
+		shaderMan->setUniform("object", "basic", wallTransform);
+		walls[i]->render();
 	}
 
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
-	wall->render();
+	// The depth test is disabled for the axises to allow them to be drawn ontop of everything else.
 	glDisable(GL_DEPTH_TEST);
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	zAxis->render();
@@ -180,9 +194,16 @@ void Application::update() {
 	camera->update(scheduler.currentTime);
 }
 int main(int argc, char const* argv[]) {
+	// The application was encapsulated in a class to have a simple way to
+	// keep track of its state and to also use the destructor to free resources
+	// incase it fails unexpectingly during its initialisation.
+	// Indeed, if the termination functions are defined at the end of the main function
+	// then they'll never be executed since the program will exit before they are reached.
 	Application* application = new Application();
 	while (!glfwWindowShouldClose(application->window)) {
 		glfwPollEvents();
+		// The scheduler locks the application to a fixed update interval but 
+		// allows it to run at the maximum possible framerate.
 		if (application->scheduler.shouldUpdate()) application->update();
 		application->render();
 		application->scheduler.FPS += 1;

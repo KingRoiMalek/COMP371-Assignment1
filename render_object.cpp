@@ -8,6 +8,7 @@
 #include "render_object.hpp"
 #include "utility.hpp"
 
+// A class that encapsulates one OpenGL vertex attribute.
 OGLVertexAttribute::OGLVertexAttribute(GLuint index, GLint size, GLenum type, GLboolean normalized) {
     this->index = index;
     this->size = size;
@@ -36,6 +37,8 @@ RenderObject::RenderObject(std::initializer_list<OGLVertexAttribute> attributes)
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     GLsizei stride = 0;
+    // We are basically dynamically generating the stride of the vertex buffer by 
+    // adding up the size of each vertex attribute, saves up a lot of heartache.
     if (attributes.size() > 1) {
         for (auto& attribute : attributes) {
             stride += attribute.size * getSizeOfType(attribute.type);
@@ -43,6 +46,7 @@ RenderObject::RenderObject(std::initializer_list<OGLVertexAttribute> attributes)
     }
     uintptr_t pointer = 0;
     for (auto& attribute : attributes) {
+        // Dynamically defining vertex attributes.
         glEnableVertexAttribArray(attribute.index);
         glVertexAttribPointer(
             attribute.index,
@@ -64,6 +68,7 @@ void RenderObject::render(GLenum mode, GLuint indexOffset, GLuint indexCount) {
     glDrawElements(mode, indexCount == 0 ? indexBufferSize : indexCount,
         GL_UNSIGNED_INT, reinterpret_cast<void*>(indexOffset * sizeof(GLuint)));
 }
+// Helper functions to update the buffers.
 void RenderObject::updateIndices(std::vector<GLuint>& indices) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,

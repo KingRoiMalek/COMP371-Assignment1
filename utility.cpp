@@ -7,6 +7,7 @@
 
 #include "utility.hpp"
 
+// A function that terminates the program if its condition is false.
 void assertFatal(bool condition, char const* format, ...) {
 	if (condition == true) return;
 	va_list arguments;
@@ -15,6 +16,7 @@ void assertFatal(bool condition, char const* format, ...) {
 	va_end(arguments);
 	exit(EXIT_FAILURE);
 }
+// A function that reads a file C-style.
 char* readFile(char const* path) {
 	printf("Reading file %s\n", path);
 	FILE* file;

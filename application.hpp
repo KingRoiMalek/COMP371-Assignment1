@@ -16,6 +16,13 @@ public:
 	double const UPDATE_INTERVAL = 1.0 / 30.0;
 	int const WINDOW_SIZE[2] = {1024, 768};
 	char const* WINDOW_TITLE = "COMP371	Assignment #1";
+	glm::vec3 INITIAL_CLUSTER_POSITIONS[5] = {
+		glm::vec3(0, 0, 0),
+		glm::vec3(25.0f, 0, 25.0f),
+		glm::vec3(-25.0f, 0, 25.0f),
+		glm::vec3(25.0f, 0, -25.0f),
+		glm::vec3(-25.0f, 0, -25.0f)
+	};
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;
@@ -30,7 +37,7 @@ public:
 	glm::vec2 worldRotation = glm::vec2(0, 0);
 	Cluster *clusters;
 	int currentCluster = 0;
-	Wall* wall;
+	Wall **walls;
 public:
 	Application();
 	~Application();

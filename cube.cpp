@@ -13,6 +13,8 @@ Cube::Cube(glm::vec4 color, glm::vec3 position) : RenderObject({ OGLVertexAttrib
 		s, s, s, color.x, color.y, color.z, color.w,
 		-s, s, s, color.x, color.y, color.z, color.w
 	};
+	// Using an index array to not have to re-use vertices over and over again for triangles
+	// that may share them. This saves up quite a bit of space (over 50% memory save).
 	std::vector<GLuint> indices = {
 		0, 1, 3, 
 		3, 1, 2,   
