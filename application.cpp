@@ -104,7 +104,16 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		application->clusters[application->currentCluster].scale -= 0.1f;
 	}
 	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+		
+
+			application->clusters[application->currentCluster].position.z += 1.0f;
+		
+	}
+	if (key == GLFW_KEY_N && action == GLFW_REPEAT) {
+
+
 		application->clusters[application->currentCluster].position.z += 1.0f;
+
 	}
 	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
 		// Rotation occurs if the CAPS LOCK key is currently active.
@@ -112,10 +121,13 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 			application->clusters[application->currentCluster].position.x -= 1.0f;
 		}
 		else {
-			application->clusters[application->currentCluster].rotation -= glm::radians(5.0f);
+			application->clusters[application->currentCluster].rotation.y -= glm::radians(5.0f);
 		}
 	}
 	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].position.z -= 1.0f;
+	}
+	if (key == GLFW_KEY_M && action == GLFW_REPEAT) {
 		application->clusters[application->currentCluster].position.z -= 1.0f;
 	}
 	if (key == GLFW_KEY_D && action == GLFW_PRESS) {
@@ -124,8 +136,28 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 			application->clusters[application->currentCluster].position.x += 1.0f;
 		}
 		else {
-			application->clusters[application->currentCluster].rotation += glm::radians(5.0f);
+			application->clusters[application->currentCluster].rotation.y += glm::radians(5.0f);
 		}
+	}
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		if (mods & GLFW_MOD_CAPS_LOCK) {
+			application->clusters[application->currentCluster].rotation.x += glm::radians(5.0f);
+		}
+		else
+		{
+			application->clusters[application->currentCluster].rotation.z += glm::radians(5.0f);
+		}
+	}
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+
+		if (mods & GLFW_MOD_CAPS_LOCK) {
+			application->clusters[application->currentCluster].rotation.x -= glm::radians(5.0f);
+		}
+		else
+		{
+			application->clusters[application->currentCluster].rotation.z -= glm::radians(5.0f);
+		}
+		
 	}
 	// Because the numerical keys are defined sequentially, this logic can be greatly simplified.
 	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_5 && action == GLFW_PRESS) {
