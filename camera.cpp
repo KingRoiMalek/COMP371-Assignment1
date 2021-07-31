@@ -11,6 +11,11 @@ Camera::Camera(glm::mat4 projection, glm::vec2 rotation) {
 Camera::~Camera() {
 	return;
 }
+void Camera::setProjection(glm::mat4 projection) {
+	this->projection = projection;
+	viewProjection = projection * view;
+	dirty = true;
+}
 void Camera::setRotation(glm::vec2 rotation) {
 	// The rotation functions are essentially the same, so only one of them will be explained.
 	pitch = rotation.x;

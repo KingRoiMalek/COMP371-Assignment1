@@ -9,6 +9,7 @@
 #include "grid.hpp"
 #include "scheduler.hpp"
 #include "shader_manager.hpp"
+#include "texture_manager.hpp"
 #include "wall.hpp"
 
 class Application {
@@ -23,6 +24,13 @@ public:
 		glm::vec3(25.0f, 0, -25.0f),
 		glm::vec3(-25.0f, 0, -25.0f)
 	};
+	glm::vec3 INITIAL_WALL_POSITIONS[5] = {
+		glm::vec3(0, 0, -2.0f),
+		glm::vec3(25.0f, 0, 23.0f),
+		glm::vec3(-25.0f, 0, 23.0f),
+		glm::vec3(25.0f, 0, -27.0f),
+		glm::vec3(-25.0f, 0, -27.0f)
+	};
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;
@@ -31,7 +39,7 @@ public:
 	Camera* camera;
 	Grid* grid;
 	ShaderManager *shaderMan;
-	Cube *cube;
+	TextureManager* textureMan;
 	Arrow *xAxis, *yAxis, *zAxis;
 public:
 	glm::vec2 worldRotation = glm::vec2(0, 0);
@@ -50,4 +58,5 @@ private:
 	void initialiseOpenGL();
 	void initialiseOpenGLShaders();
 	void initialiseScene();
+	void initialiseTextures();
 };

@@ -158,6 +158,8 @@
     <ClCompile Include="scheduler.cpp" />
     <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="cluster.cpp" />
+    <ClCompile Include="stb_image.c" />
+    <ClCompile Include="texture_manager.cpp" />
     <ClCompile Include="utility.cpp" />
     <ClCompile Include="wall.cpp" />
   </ItemGroup>
@@ -170,6 +172,8 @@
     <ClInclude Include="render_object.hpp" />
     <ClInclude Include="scheduler.hpp" />
     <ClInclude Include="shader_manager.hpp" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture_manager.hpp" />
     <ClInclude Include="utility.hpp" />
     <ClInclude Include="wall.hpp" />
   </ItemGroup>

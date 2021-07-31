@@ -29,6 +29,7 @@ public:
 	Camera(glm::mat4 projection, glm::vec2 rotation);
 	~Camera();
 public:
+	void setProjection(glm::mat4 projection);
 	void setRotation(glm::vec2 rotation);
 	void rotate(glm::vec2 mouseDelta);
 	void update(double currentTime);

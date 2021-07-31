@@ -24,7 +24,7 @@ void ShaderManager::appendShader(std::string const& name, GLenum type, std::stri
     auto shaderTypeToString = [](GLenum shaderType) {
         switch (shaderType) {
         case GL_VERTEX_SHADER: return std::string("GL_VERTEX_SHADER");
-        case GL_FRAGMENT_SHADER: return std::string("GL_VERTEX_SHADER");
+        case GL_FRAGMENT_SHADER: return std::string("GL_FRAGMENT_SHADER");
         default: return std::string("GL_UNKNOWN_SHADER");
         }
     };
@@ -139,6 +139,13 @@ void ShaderManager::setUniform(std::string const& uniformName, std::string const
     GLint const location = getUniformLocation(uniformName, programName, program);
     if (location == -1) return;
     glUniform4fv(location, 1, glm::value_ptr(value));
+}
+void ShaderManager::setUniform(std::string const& uniformName, std::string const& programName, glm::vec3 value) {
+    useProgram(programName);
+    GLuint const program = getCurrentProgram();
+    GLint const location = getUniformLocation(uniformName, programName, program);
+    if (location == -1) return;
+    glUniform3fv(location, 1, glm::value_ptr(value));
 }
 void ShaderManager::setUniform(std::string const& uniformName, std::string const& programName, GLint value) {
     useProgram(programName);

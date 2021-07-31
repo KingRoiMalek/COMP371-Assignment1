@@ -1,6 +1,7 @@
 #include "wall.hpp"
 
-Wall::Wall(Cluster* cluster, glm::vec3 position, glm::vec4 color) : RenderObject({ OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE), OGLVertexAttribute(1, 4, GL_FLOAT, GL_FALSE) }) {
+Wall::Wall(Cluster* cluster, glm::vec3 position, glm::vec4 color) : RenderObject({ 
+	OGLVertexAttribute(0, 3, GL_FLOAT, GL_FALSE), OGLVertexAttribute(1, 4, GL_FLOAT, GL_FALSE), OGLVertexAttribute(2, 2, GL_FLOAT, GL_FALSE), OGLVertexAttribute(3, 3, GL_FLOAT, GL_FALSE) }) {
 	// The algorithm to generate a wall is very simple.
 	// 1. Define a big array of 0/1 values and set it all to values of 1
 	// [1][1][1][1][1]
@@ -32,7 +33,6 @@ Wall::Wall(Cluster* cluster, glm::vec3 position, glm::vec4 color) : RenderObject
 	std::vector<GLuint> indices;
 	GLuint indexOffset = 0;
 	GLfloat const s = 0.5;
-	GLfloat zOffset = -2.0f;
 	GLfloat thickness = 0.2f;
 	for (int i = 0; i < 7; i += 1) {
 		for (int j = 0; j < 7; j += 1) {
@@ -40,34 +40,44 @@ Wall::Wall(Cluster* cluster, glm::vec3 position, glm::vec4 color) : RenderObject
 			float x = (float)i - 3.0f;
 			float y = (float)j - 3.0f;
 			GLfloat ii[] = {
-				x - s, y - s, zOffset - thickness, color.x, color.y, color.z, color.w,
-				x + s, y - s, zOffset - thickness, color.x, color.y, color.z, color.w,
-				x + s, y + s, zOffset - thickness, color.x, color.y, color.z, color.w,
-				x - s, y + s, zOffset - thickness, color.x, color.y, color.z, color.w,
-				x - s, y - s, zOffset, color.x, color.y, color.z, color.w,
-				x + s, y - s, zOffset, color.x, color.y, color.z, color.w,
-				x + s, y + s, zOffset, color.x, color.y, color.z, color.w,
-				x - s, y + s, zOffset, color.x, color.y, color.z, color.w
+				x + s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+				x + s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+				x + s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+				x + s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+
+				x - s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+				x - s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+				x + s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+				x + s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+				x - s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				x - s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+				x - s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+				x - s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+
+				x + s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+				x + s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+				x - s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+				x - s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+
+				x + s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+				x + s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+				x - s, y - s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+				x - s, y + s, thickness / 2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+
+				x + s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+				x + s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				x - s, y + s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				x - s, y - s, thickness / -2.0f, color.x, color.y, color.z, color.w, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
 			};
 
 			vertices.insert(vertices.end(), std::begin(ii), std::end(ii));
-			GLuint jj[] = {
-				indexOffset + 0, indexOffset + 1, indexOffset + 3,
-				indexOffset + 3, indexOffset + 1, indexOffset + 2,
-				indexOffset + 1, indexOffset + 5, indexOffset + 2,
-				indexOffset + 2, indexOffset + 5, indexOffset + 6,
-				indexOffset + 5, indexOffset + 4, indexOffset + 6,
-				indexOffset + 6, indexOffset + 4, indexOffset + 7,
-				indexOffset + 4, indexOffset + 0, indexOffset + 7,
-				indexOffset + 7, indexOffset + 0, indexOffset + 3,
-				indexOffset + 3, indexOffset + 2, indexOffset + 7,
-				indexOffset + 7, indexOffset + 2, indexOffset + 6,
-				indexOffset + 4, indexOffset + 5, indexOffset + 0,
-				indexOffset + 0, indexOffset + 5, indexOffset + 1
-			};
-			
-			indices.insert(indices.end(), std::begin(jj), std::end(jj));
-			indexOffset += 8;
+			for (GLuint k = indexOffset; k < indexOffset + 24; k += 4) {
+				GLuint jj[] = { k, k + 1, k + 3, k + 3, k + 1, k + 2 };
+				indices.insert(indices.end(), std::begin(jj), std::end(jj));
+			}
+
+			indexOffset += 24;
 		}
 	}
 	updateVertices(vertices);

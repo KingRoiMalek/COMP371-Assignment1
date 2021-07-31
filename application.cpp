@@ -13,6 +13,7 @@ Application::Application() {
 	initialiseOpenGL();
 	initialiseOpenGLShaders();
 	srand(time(NULL));
+	initialiseTextures();
 	initialiseScene();
 }
 Application::~Application() {
@@ -20,6 +21,7 @@ Application::~Application() {
 	glfwTerminate();
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+void handleWindowResize(GLFWwindow* window, int width, int height);
 void Application::initialiseGLFW() {
 	printf("Initialising GLFW\n");
 	assertFatal(glfwInit(), "Could not initialise GLFW\n");
@@ -27,6 +29,7 @@ void Application::initialiseGLFW() {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	window = glfwCreateWindow(WINDOW_SIZE[0], WINDOW_SIZE[1], WINDOW_TITLE, NULL, NULL);
 	assertFatal(window != NULL, "Could not create window\n");
 	glfwMakeContextCurrent(window);
@@ -34,6 +37,7 @@ void Application::initialiseGLFW() {
 	glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window, handleInput);
+	glfwSetWindowSizeCallback(window, handleWindowResize);
 	// Hide the cursor.
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
@@ -47,9 +51,9 @@ void Application::initialiseOpenGL() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Enable back-face culling.
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CW);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	//glFrontFace(GL_CW);
 }
 void Application::initialiseOpenGLShaders() {
 	printf("Loading OpenGL shaders\n");
@@ -59,12 +63,15 @@ void Application::initialiseOpenGLShaders() {
 	shaderMan->appendShader("basicVert", GL_VERTEX_SHADER, "resources/shaders/basic.vert");
 	shaderMan->appendShader("basicFrag", GL_FRAGMENT_SHADER, "resources/shaders/basic.frag");
 	shaderMan->createProgram("basic", { "basicVert", "basicFrag" });
+	shaderMan->appendShader("textureVert", GL_VERTEX_SHADER, "resources/shaders/texture.vert");
+	shaderMan->appendShader("textureFrag", GL_FRAGMENT_SHADER, "resources/shaders/texture.frag");
+	shaderMan->createProgram("texture", { "textureVert", "textureFrag" });
 }
 void Application::initialiseScene() {
 	float const ASPECT_RATIO =
 		((float)Application::WINDOW_SIZE[0]) / Application::WINDOW_SIZE[1];
 	glm::mat4x4 const projection =
-		glm::perspective(45.0f, ASPECT_RATIO, 0.1f, 1000.0f);
+		glm::perspective(glm::radians(90.0f), ASPECT_RATIO, 0.1f, 1000.0f);
 	camera = new Camera(projection, glm::vec2(glm::radians(-10.0f), 0));
 	grid = new Grid(100, 100, 0.5f);
 	xAxis = new Arrow(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 2.5f);
@@ -74,8 +81,18 @@ void Application::initialiseScene() {
 	walls = new Wall*[5];
 	for (int i = 0; i < 5; i += 1) {
 		clusters[i].setPosition(INITIAL_CLUSTER_POSITIONS[i]);
-		walls[i] = new Wall(&clusters[i], INITIAL_CLUSTER_POSITIONS[i]);
+		walls[i] = new Wall(&clusters[i], INITIAL_WALL_POSITIONS[i]);
 	}
+}
+void Application::initialiseTextures() {
+	printf("Loading textures\n");
+	textureMan = new TextureManager();
+	textureMan->loadTexture("brick", GL_TEXTURE_2D, "resources/textures/brick.png");
+	textureMan->bindTextureToUnit(1, "brick");
+	textureMan->loadTexture("tile", GL_TEXTURE_2D, "resources/textures/tile.png");
+	textureMan->bindTextureToUnit(2, "tile");
+	textureMan->loadTexture("metal", GL_TEXTURE_2D, "resources/textures/metal.jpg");
+	textureMan->bindTextureToUnit(3, "metal");
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Application* application = (Application*) glfwGetWindowUserPointer(window);
@@ -135,7 +152,7 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		for (int i = 0; i < 5; i += 1) {
 			application->clusters[i].cubes.clear();
 			application->clusters[i].generateCluster();
-			application->walls[i] = new Wall(&application->clusters[i], application->INITIAL_CLUSTER_POSITIONS[i]);
+			application->walls[i] = new Wall(&application->clusters[i], application->INITIAL_WALL_POSITIONS[i]);
 		}
 	}
 }
@@ -157,33 +174,52 @@ void Application::handleMouse() {
 	}
 	camera->rotate(delta);
 }
+void handleWindowResize(GLFWwindow* window, int width, int height) {
+	Application* application = (Application*)glfwGetWindowUserPointer(window);
+	float const ASPECT_RATIO =
+		((float)width) / ((float)height);
+	glm::mat4x4 const projection =
+		glm::perspective(glm::radians(90.0f), ASPECT_RATIO, 0.1f, 1000.0f);
+	application->camera->setProjection(projection);
+	glViewport(0, 0, width, height);
+}
 void Application::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	shaderMan->useProgram("basic");
 	glEnable(GL_DEPTH_TEST);
 	if (camera->dirty) {
+		shaderMan->setUniform("viewProjection", "texture", camera->viewProjection);
 		shaderMan->setUniform("viewProjection", "basic", camera->viewProjection);
+		shaderMan->setUniform("cameraPosition", "texture", camera->position);
 	}
 	glm::mat4 worldRotationMat =
 		glm::rotate(glm::mat4(1.0f), worldRotation.x, glm::vec3(0, 1.0f, 0)) *
 		glm::rotate(glm::mat4(1.0f), worldRotation.y, glm::vec3(1.0f, 0, 0));
+	shaderMan->setUniform("lightPosition", "texture", glm::vec3(0, 20.0f, 0));
 	shaderMan->setUniform("world", "basic", worldRotationMat);
-	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
+	shaderMan->useProgram("texture");
+	shaderMan->setUniform("world", "texture", worldRotationMat);
+	shaderMan->setUniform("object", "texture", glm::mat4(1.0f));
+	shaderMan->setUniform("textureSampler", "texture", 1);
 	grid->render();
 	for (int i = 0; i < 5; i += 1) {
+		shaderMan->setUniform("textureSampler", "texture", 2);
 		clusters[i].render(shaderMan);
 		glm::mat4 wallTransform = glm::translate(glm::mat4(1.0f), walls[i]->position);
-		shaderMan->setUniform("object", "basic", wallTransform);
+		shaderMan->setUniform("object", "texture", wallTransform);
+		shaderMan->setUniform("textureSampler", "texture", 0);
 		walls[i]->render();
 	}
 
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	// The depth test is disabled for the axises to allow them to be drawn ontop of everything else.
 	glDisable(GL_DEPTH_TEST);
+	shaderMan->setUniform("color", "basic", glm::vec4(0, 0, 1.0f, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	zAxis->render();
+	shaderMan->setUniform("color", "basic", glm::vec4(1.0f, 0, 0, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1.0f, 0)));
 	xAxis->render();
+	shaderMan->setUniform("color", "basic", glm::vec4(0, 1.0f, 0, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0, 0)));
 	yAxis->render();
 	glfwSwapBuffers(window);
