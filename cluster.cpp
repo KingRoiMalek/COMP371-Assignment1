@@ -8,7 +8,7 @@
 Cluster::Cluster() {
 	generateCluster();
 }
-Cluster::Cluster(glm::vec3 position, float rotation, float scale) {
+Cluster::Cluster(glm::vec3 position, glm::vec3 rotation, float scale) {
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
@@ -62,17 +62,19 @@ void Cluster::generateCluster() {
 		}
 	}
 }
-void Cluster::render(ShaderManager* shaderMan) {
+void Cluster::render(ShaderManager* shaderMan, std::string const& programName) {
 	// Render every cube of the cluster separately.
 	for (Cube *cube : cubes) {
 		const glm::mat4 i = glm::mat4(1.0f);
 		// The order of matrix multiplication matters.
 		glm::mat4 transform = 
 		glm::translate(i, position) * // Step 4: Translate cluster
-		glm::rotate(i, rotation, glm::vec3(0, 1.0f, 0)) * // Step 3: Rotate cluster around y-axis
+		glm::rotate(i, rotation.x, glm::vec3(1.0f, 0, 0)) * // Step 3: Rotate cluster around x-axis
+		glm::rotate(i, rotation.y, glm::vec3(0, 1.0f, 0)) * // Step 3: Rotate cluster around y-axis
+		glm::rotate(i, rotation.z, glm::vec3(0, 0, 1.0f)) * // Step 3: Rotate cluster around y-axis
 		glm::scale(i, glm::vec3(scale)) * // Step 2: Scale cluster by a constant
 		glm::translate(i, cube->position); // Step 1: Translate cube by offset
-		shaderMan->setUniform("object", "texture", transform);
+		shaderMan->setUniform("object", programName, transform);
 		cube->render();
 	}
 }

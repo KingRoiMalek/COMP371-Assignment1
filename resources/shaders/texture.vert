@@ -17,7 +17,7 @@ void main()
 {
 	vertColor = color;
 	vertTexCoord = texCoord;
-	vertNormal = normal;
-	fragPosition = (world * object * vec4(position, 1.0)).xyz;
+	vertNormal = mat3(transpose(inverse(object))) * normal;
+	fragPosition = (object * vec4(position, 1.0)).xyz;
     gl_Position = viewProjection * world * object * vec4(position, 1.0);
 }

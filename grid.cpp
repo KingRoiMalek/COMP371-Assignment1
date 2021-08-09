@@ -18,7 +18,7 @@ Grid::Grid(int width, int height, GLfloat sideLength, glm::vec4 color) : RenderO
 			};
 
 			vertices.insert(vertices.end(), std::begin(ii), std::end(ii));
-			GLuint jj[] = { indexOffset, indexOffset + 1, indexOffset + 3, indexOffset + 3, indexOffset + 1, indexOffset + 2 };
+			GLuint jj[] = { indexOffset + 3, indexOffset + 1, indexOffset, indexOffset + 2, indexOffset + 1, indexOffset + 3 };
 			indices.insert(indices.end(), std::begin(jj), std::end(jj));
 			indexOffset += 4;
 		}

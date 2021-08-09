@@ -44,6 +44,22 @@ void TextureManager::loadTexture(std::string const& name, GLenum type, std::stri
     glGenerateMipmap(type);
     textures[name] = texture;
 }
+void TextureManager::generateCubemap(std::string const& name) {
+    struct Texture texture = { 0 };
+    texture.type = GL_TEXTURE_CUBE_MAP;
+    texture.size[0] = 2048;
+    texture.size[1] = 2048;
+    glGenTextures(1, &texture.identifier);
+    glBindTexture(texture.type, texture.identifier);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, texture.size[0], texture.size[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(texture.type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(texture.type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(texture.type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(texture.type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(texture.type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    textures[name] = texture;
+}
 TextureManager::Texture& TextureManager::getTexture(std::string const& name) {
     auto item = textures.find(name);
     assertFatal(item != textures.end(), "Could not get texture %s\n",
@@ -59,6 +75,7 @@ void TextureManager::bindTextureToUnit(GLint unit, std::string const& name) {
 std::string TextureManager::textureTypeToString(GLenum type) {
     switch (type) {
     case GL_TEXTURE_2D: return std::string("GL_TEXTURE_2D");
+    case GL_TEXTURE_CUBE_MAP: return std::string("GL_TEXTURE_CUBE_MAP");
     default: return std::string("GL_UNKNOWN_TEXTURE");
     }
 }

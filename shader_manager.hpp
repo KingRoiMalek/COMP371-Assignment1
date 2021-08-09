@@ -27,6 +27,7 @@ public:
 	void setUniform(std::string const& uniformName, std::string const& programName, glm::vec3 value);
 	void setUniform(std::string const& uniformName, std::string const& programName, GLint value);
 	void setUniform(std::string const& uniformName, std::string const& programName, GLfloat value);
+	void setUniform(std::string const& uniformName, std::string const& programName, GLboolean value);
 private:
 	GLuint currentProgram = 0;
 	std::string currentProgramName;

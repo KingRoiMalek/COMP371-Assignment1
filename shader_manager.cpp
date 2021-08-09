@@ -161,3 +161,10 @@ void ShaderManager::setUniform(std::string const& uniformName, std::string const
     if (location == -1) return;
     glUniform1f(location, value);
 }
+void ShaderManager::setUniform(std::string const& uniformName, std::string const& programName, GLboolean value) {
+    useProgram(programName);
+    GLuint const program = getCurrentProgram();
+    GLint const location = getUniformLocation(uniformName, programName, program);
+    if (location == -1) return;
+    glUniform1i(location, value);
+}

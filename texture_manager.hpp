@@ -18,6 +18,7 @@ public:
     ~TextureManager();
 public:
     void loadTexture(std::string const& name, GLenum type, std::string const& path);
+    void generateCubemap(std::string const& name);
     struct Texture& getTexture(std::string const& name);
     void bindTextureToUnit(GLint unit, std::string const& name);
 private:
