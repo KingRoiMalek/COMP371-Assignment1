@@ -38,7 +38,7 @@ void Cluster::generateCluster() {
 	glm::vec3 const offsets[] = { UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD };
 	std::vector<glm::vec3> coordinates = { glm::vec3(0.0f, 0.0f, 0.0f) };
 	appendCube(glm::vec3(0.0f, 0.0f, 0.0f));
-	while (coordinates.size() < 9) {
+	while (coordinates.size() < 4) {
 		int const coordinateCount = coordinates.size();
 		// Randomly select a cube.
 		glm::vec3 randomCoordinate = coordinates[rand() % coordinateCount];

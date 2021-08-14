@@ -22,7 +22,7 @@ public:
 	double const UPDATE_INTERVAL = 1.0 / 30.0;
 	char const* WINDOW_TITLE = "COMP371	Assignment #1";
 	glm::vec3 INITIAL_CLUSTER_POSITIONS[5] = {
-		glm::vec3(0, 0, 0),
+		glm::vec3(0, 0, 20),
 		glm::vec3(25.0f, 0, 25.0f),
 		glm::vec3(-25.0f, 0, 25.0f),
 		glm::vec3(25.0f, 0, -25.0f),
@@ -42,6 +42,7 @@ public:
 	GLFWwindow* window = nullptr;
 	glm::dvec2 lastMousePos = glm::dvec2(0, 0);
 	int windowSize[2] = { 1024, 768 };
+	float currentSpeed = 10.0f;
 public:
 	Camera* camera;
 	Grid* grid;
@@ -70,6 +71,7 @@ public:
 	void render();
 	void renderShadowMap();
 	void update();
+	void resetGame();
 private:
 	void initialiseGLFW();
 	void initialiseOpenGL();

@@ -82,9 +82,9 @@ void Application::initialiseScene() {
 	xAxis = new Arrow(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 2.5f);
 	yAxis = new Arrow(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 2.5f);
 	zAxis = new Arrow(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 2.5f);
-	clusters = new Cluster[5];
-	walls = new Wall * [5];
-	for (int i = 0; i < 5; i += 1) {
+	clusters = new Cluster[1];
+	walls = new Wall * [1];
+	for (int i = 0; i < 1; i += 1) {
 		clusters[i].setPosition(INITIAL_CLUSTER_POSITIONS[i]);
 		walls[i] = new Wall(&clusters[i], INITIAL_WALL_POSITIONS[i]);
 	}
@@ -116,6 +116,7 @@ void Application::initialiseTextures() {
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Application* application = (Application*)glfwGetWindowUserPointer(window);
+	/*
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -158,9 +159,33 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key == GLFW_KEY_J && action == GLFW_PRESS) {
 		application->clusters[application->currentCluster].scale -= 0.1f;
 	}
+	*/
+
 	if (!application->enableSmoothMoves && key == GLFW_KEY_W && action == GLFW_PRESS) {
-		application->clusters[application->currentCluster].position.z += 1.0f;
+		application->clusters[application->currentCluster].rotation.x += glm::radians(-90.0f);
 	}
+
+	if (!application->enableSmoothMoves && key == GLFW_KEY_D && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].rotation.z += glm::radians(-90.0f);
+	}
+
+	if (!application->enableSmoothMoves && key == GLFW_KEY_S && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].rotation.x += glm::radians(90.0f);
+	}
+
+	if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].rotation.z += glm::radians(90.0f);
+	}
+
+	if (!application->enableSmoothMoves && key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		if (application->currentSpeed == 10.0f) {
+			application->currentSpeed = 100.0f;
+		}
+		else {
+			application->currentSpeed = 10.0f;
+		}
+	}
+	/*
 	if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
 		// Rotation occurs if the CAPS LOCK key is currently active.
 		if (mods & GLFW_MOD_CAPS_LOCK) {
@@ -207,12 +232,13 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 		application->currentCluster = key - GLFW_KEY_1;
 	}
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
-		for (int i = 0; i < 5; i += 1) {
+		for (int i = 0; i < 1; i += 1) {
 			application->clusters[i].cubes.clear();
 			application->clusters[i].generateCluster();
 			application->walls[i] = new Wall(&application->clusters[i], application->INITIAL_WALL_POSITIONS[i]);
 		}
 	}
+	*/
 }
 void Application::handleMouse() {
 	glm::dvec2 mousePos;
@@ -282,7 +308,7 @@ void Application::render() {
 	shaderMan->setUniform("textureSampler", "texture", 1);
 	shaderMan->setUniform("specularStrength", "texture", 0.15f);
 	grid->render();
-	for (int i = 0; i < 5; i += 1) {
+	for (int i = 0; i < 1; i += 1) {
 		shaderMan->setUniform("textureSampler", "texture", 2);
 		shaderMan->setUniform("specularStrength", "texture", 0.6f);
 		clusters[i].render(shaderMan, "texture");
@@ -324,7 +350,7 @@ void Application::renderShadowMap() {
 
 	shaderMan->setUniform("object", "shadow", glm::mat4(1.0f));
 	grid->render();
-	for (int i = 0; i < 5; i += 1) {
+	for (int i = 0; i < 1; i += 1) {
 		clusters[i].render(shaderMan, "shadow");
 		glm::mat4 wallTransform = glm::translate(glm::mat4(1.0f), walls[i]->position);
 		shaderMan->setUniform("object", "shadow", wallTransform);
@@ -337,7 +363,22 @@ void Application::update() {
 	handleMouse();
 	handleKeyboard();
 	camera->update(scheduler.currentTime);
+	if (clusters[0].position.z > -20.0f) {
+		clusters[0].position = clusters[0].position + glm::vec3(0.0f, 0.0f, -0.01f * currentSpeed);
+	}
+	else if (clusters[0].position.z == -20.0f || clusters[0].position.z < -20.0f) {
+		resetGame();
+	}
+	camera->position = clusters[0].position + glm::vec3(0.0f, 5.0f, 10.0f);
 }
+
+void Application::resetGame() {
+	clusters[0].generateCluster();
+	clusters[0].setPosition(INITIAL_CLUSTER_POSITIONS[0]);
+	walls[0] = new Wall(&clusters[0], INITIAL_WALL_POSITIONS[0]);
+	currentSpeed = 10.0f;
+}
+
 int main(int argc, char const* argv[]) {
 	// The application was encapsulated in a class to have a simple way to
 	// keep track of its state and to also use the destructor to free resources
