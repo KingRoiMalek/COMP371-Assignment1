@@ -373,6 +373,7 @@ void Application::update() {
 }
 
 void Application::resetGame() {
+	clusters[0] = Cluster();
 	clusters[0].generateCluster();
 	clusters[0].setPosition(INITIAL_CLUSTER_POSITIONS[0]);
 	walls[0] = new Wall(&clusters[0], INITIAL_WALL_POSITIONS[0]);
