@@ -6,6 +6,8 @@
 #include "cluster.hpp"
 #include "render_object.hpp"
 
+#include <vector>
+
 class Wall : RenderObject {
 public:
 	glm::vec3 position = glm::vec3(0, 0, 0);

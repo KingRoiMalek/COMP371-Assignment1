@@ -7,6 +7,10 @@
 #include "application.hpp"
 #include "shader_manager.hpp"
 #include "utility.hpp"
+#include "glm/ext.hpp"
+#include <iostream>
+#include "glm/gtx/string_cast.hpp"
+using namespace std;
 
 Application::Application() {
 	initialiseGLFW();
@@ -360,24 +364,63 @@ void Application::renderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void Application::update() {
-	handleMouse();
-	handleKeyboard();
-	camera->update(scheduler.currentTime);
+	if (!hitWall) {
+		handleMouse();
+		handleKeyboard();
+		camera->update(scheduler.currentTime);
+		moveCluster();
+		if (verifyLocation()) {
+			bool notHit = clusters[0].rotation.x == 0.000000f &&
+				clusters[0].rotation.y == 0.000000f &&
+				clusters[0].rotation.z == 0.000000f;
+
+			if (notHit)
+			{
+				printf("success");
+			}else if(!notHit) {
+				hitWall == true;
+				currentSpeed = 0;
+			}
+		}
+		camera->position = clusters[0].position + glm::vec3(0.0f, 5.0f, 10.0f);
+	}
+	
+}
+
+void Application::moveCluster() {
 	if (clusters[0].position.z > -20.0f) {
 		clusters[0].position = clusters[0].position + glm::vec3(0.0f, 0.0f, -0.01f * currentSpeed);
 	}
 	else if (clusters[0].position.z == -20.0f || clusters[0].position.z < -20.0f) {
 		resetGame();
 	}
-	camera->position = clusters[0].position + glm::vec3(0.0f, 5.0f, 10.0f);
+}
+
+bool Application::verifyLocation() {
+	glm::vec3 pos = glm::vec3(floor(clusters[0].position.x), floor(clusters[0].position.y), floor(clusters[0].position.z));
+	return pos == walls[0]->position;
 }
 
 void Application::resetGame() {
 	clusters[0] = Cluster();
+	randomRotate();
 	clusters[0].generateCluster();
 	clusters[0].setPosition(INITIAL_CLUSTER_POSITIONS[0]);
 	walls[0] = new Wall(&clusters[0], INITIAL_WALL_POSITIONS[0]);
 	currentSpeed = 10.0f;
+}
+
+void Application::randomRotate() {
+	int index = rand() % 4;
+	if (index == 0) {
+		clusters[0].rotation.x += glm::radians(-90.0f);
+	}else if (index == 1) {
+		clusters[0].rotation.x += glm::radians(90.0f);
+	}else if (index == 2) {
+		clusters[0].rotation.z += glm::radians(-90.0f);
+	}else if (index == 3) {
+		clusters[0].rotation.z += glm::radians(90.0f);
+	}
 }
 
 int main(int argc, char const* argv[]) {
@@ -387,6 +430,7 @@ int main(int argc, char const* argv[]) {
 	// Indeed, if the termination functions are defined at the end of the main function
 	// then they'll never be executed since the program will exit before they are reached.
 	Application* application = new Application();
+	application->randomRotate();
 	while (!glfwWindowShouldClose(application->window)) {
 		glfwPollEvents();
 		// The scheduler locks the application to a fixed update interval but 

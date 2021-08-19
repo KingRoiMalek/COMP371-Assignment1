@@ -78,6 +78,9 @@ void Cluster::render(ShaderManager* shaderMan, std::string const& programName) {
 		cube->render();
 	}
 }
+
+
+
 void Cluster::setPosition(glm::vec3 position) {
 	this->position = position;
 }

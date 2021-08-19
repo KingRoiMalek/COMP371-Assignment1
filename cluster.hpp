@@ -5,9 +5,11 @@
 #include "cube.hpp"
 #include "shader_manager.hpp"
 
+
 class Cluster {
 public:
 	std::vector<Cube*> cubes;
+	std::vector<glm::vec3> cubePositions;
 public:
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec3 rotation = glm::vec3(0.0f);

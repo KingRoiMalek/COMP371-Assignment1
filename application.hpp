@@ -62,6 +62,7 @@ public:
 	bool enableTextures = true;
 	bool enableShadows = true;
 	bool enableSmoothMoves = false;
+	bool hitWall = false;
 public: 
 	Application();
 	~Application();
@@ -72,6 +73,9 @@ public:
 	void renderShadowMap();
 	void update();
 	void resetGame();
+	void moveCluster();
+	void randomRotate();
+	bool verifyLocation();
 private:
 	void initialiseGLFW();
 	void initialiseOpenGL();
