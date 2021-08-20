@@ -38,7 +38,6 @@ public:
 	glm::vec3 LIGHT_POSITION = glm::vec3(0, 15.0f, 0);
 	GLfloat SHADOWMAP_FAR_PLANE = 25.0f;
 	int points = 0;
-	int playCount = 0;
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;

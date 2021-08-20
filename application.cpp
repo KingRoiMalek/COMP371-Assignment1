@@ -364,11 +364,6 @@ void Application::renderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void Application::update() {
-	if (playCount == 5) {
-		// exit the game
-		return; // call game over screen with final score here
-	}
-	
 	if (!hitWall) {
 		handleMouse();
 		handleKeyboard();
@@ -406,7 +401,6 @@ bool Application::verifyLocation() {
 }
 
 void Application::resetGame() {
-	playCount++;
 	clusters[0] = Cluster();
 	randomRotate();
 	clusters[0].generateCluster();
