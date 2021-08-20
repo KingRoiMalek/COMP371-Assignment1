@@ -20,7 +20,7 @@ enum RotationMode {
 class Application {
 public:
 	double const UPDATE_INTERVAL = 1.0 / 30.0;
-	char const* WINDOW_TITLE = "COMP371	Assignment #1";
+	char const* WINDOW_TITLE = "COMP371	Final Project";
 	glm::vec3 INITIAL_CLUSTER_POSITIONS[5] = {
 		glm::vec3(0, 0, 20),
 		glm::vec3(25.0f, 0, 25.0f),
@@ -37,6 +37,8 @@ public:
 	};
 	glm::vec3 LIGHT_POSITION = glm::vec3(0, 15.0f, 0);
 	GLfloat SHADOWMAP_FAR_PLANE = 25.0f;
+	int points = 0;
+	int playCount = 0;
 public:
 	Scheduler scheduler = Scheduler(UPDATE_INTERVAL);
 	GLFWwindow* window = nullptr;

@@ -364,6 +364,11 @@ void Application::renderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void Application::update() {
+	if (playCount == 5) {
+		// exit the game
+		return; // call game over screen with final score here
+	}
+	
 	if (!hitWall) {
 		handleMouse();
 		handleKeyboard();
@@ -374,12 +379,11 @@ void Application::update() {
 				clusters[0].rotation.y == 0.000000f &&
 				clusters[0].rotation.z == 0.000000f;
 
-			if (notHit)
-			{
-				printf("success");
-			}else if(!notHit) {
+			if (notHit) {
+				points += 1000; // If shape goes through successfully, increment points
+			} else if(!notHit) {
 				hitWall == true;
-				currentSpeed = 0;
+				resetGame(); // reset shape here
 			}
 		}
 		camera->position = clusters[0].position + glm::vec3(0.0f, 5.0f, 10.0f);
@@ -388,10 +392,10 @@ void Application::update() {
 }
 
 void Application::moveCluster() {
-	if (clusters[0].position.z > -20.0f) {
+	if (clusters[0].position.z > -15.0f) {
 		clusters[0].position = clusters[0].position + glm::vec3(0.0f, 0.0f, -0.01f * currentSpeed);
 	}
-	else if (clusters[0].position.z == -20.0f || clusters[0].position.z < -20.0f) {
+	else if (clusters[0].position.z == -15.0f || clusters[0].position.z < -15.0f) {
 		resetGame();
 	}
 }
@@ -402,6 +406,7 @@ bool Application::verifyLocation() {
 }
 
 void Application::resetGame() {
+	playCount++;
 	clusters[0] = Cluster();
 	randomRotate();
 	clusters[0].generateCluster();
