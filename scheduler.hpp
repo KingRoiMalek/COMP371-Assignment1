@@ -15,4 +15,5 @@ public:
 	~Scheduler();
 public:
 	bool shouldUpdate();
+	bool shouldTickSecond();
 };

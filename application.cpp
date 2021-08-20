@@ -15,6 +15,7 @@ Application::Application() {
 	srand(time(NULL));
 	initialiseTextures();
 	initialiseScene();
+	initialiseSound();
 }
 Application::~Application() {
 	if (window) glfwDestroyWindow(window);
@@ -70,6 +71,9 @@ void Application::initialiseOpenGLShaders() {
 	shaderMan->appendShader("shadowFrag", GL_FRAGMENT_SHADER, "resources/shaders/shadow.frag");
 	shaderMan->appendShader("shadowGeom", GL_GEOMETRY_SHADER, "resources/shaders/shadow.geom");
 	shaderMan->createProgram("shadow", { "shadowVert", "shadowFrag", "shadowGeom" });
+	shaderMan->appendShader("quadVert", GL_VERTEX_SHADER, "resources/shaders/quad.vert");
+	shaderMan->appendShader("quadFrag", GL_FRAGMENT_SHADER, "resources/shaders/quad.frag");
+	shaderMan->createProgram("quad", { "quadVert", "quadFrag" });
 }
 void Application::initialiseScene() {
 	float const ASPECT_RATIO =
@@ -83,6 +87,7 @@ void Application::initialiseScene() {
 	yAxis = new Arrow(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 2.5f);
 	zAxis = new Arrow(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 2.5f);
 	clusters = new Cluster[5];
+	model = new Model("resources/models/model.obj", glm::vec4(1.0f, 0.498f, 0.498f, 1.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec2(0.0f, glm::radians(150.0f)), 2.5f);
 	walls = new Wall * [5];
 	for (int i = 0; i < 5; i += 1) {
 		clusters[i].setPosition(INITIAL_CLUSTER_POSITIONS[i]);
@@ -95,6 +100,62 @@ void Application::initialiseScene() {
 	shadowTransforms.push_back(shadowProj * glm::lookAt(LIGHT_POSITION, LIGHT_POSITION + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 	shadowTransforms.push_back(shadowProj * glm::lookAt(LIGHT_POSITION, LIGHT_POSITION + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	shadowTransforms.push_back(shadowProj * glm::lookAt(LIGHT_POSITION, LIGHT_POSITION + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	glm::mat4x4 const ortho =
+		glm::ortho(windowSize[0] / -2.0f, windowSize[0] / 2.0f, windowSize[1] / -2.0f, windowSize[1] / 2.0f, -1.0f, 1.0f);
+	shaderMan->setUniform("projection", "quad", ortho);
+	hyperCube = new Quad(glm::vec2(0, 300), glm::vec2(368, 58), glm::vec2(0.0475, 0.05), glm::vec2(0.5075, 0.1225));
+	gameOver = new Quad(glm::vec2(0, 0), glm::vec2(313, 50), glm::vec2(0.55875, 0.05125), glm::vec2(0.95, 0.11375));
+	getStarted = new Quad(glm::vec2(0, -300), glm::vec2(411, 30), glm::vec2(0.04375, 0.14125), glm::vec2(0.5575, 0.17875));
+	_score = new Quad(glm::vec2(-400, 340), glm::vec2(151, 38), glm::vec2(0.62875, 0.14125), glm::vec2(0.8175, 0.18875));
+	_timer = new Quad(glm::vec2(350, 340), glm::vec2(139, 36), glm::vec2(0.73, 0.22875), glm::vec2(0.90375, 0.27375));
+	instructions = new Quad(glm::vec2(0, -220), glm::vec2(639, 94), glm::vec2(0.085, 0.3075), glm::vec2(0.88375, 0.425));
+	digits[0] = new Quad(glm::vec2(0, 0), glm::vec2(26, 35), glm::vec2(0.07875, 0.21375), glm::vec2(0.11125, 0.2575));
+	digits[1] = new Quad(glm::vec2(0, 0), glm::vec2(23, 35), glm::vec2(0.1275, 0.21375), glm::vec2(0.15625, 0.2575));
+	digits[2] = new Quad(glm::vec2(0, 0), glm::vec2(23, 35), glm::vec2(0.1725, 0.21375), glm::vec2(0.20125, 0.2575));
+	digits[3] = new Quad(glm::vec2(0, 0), glm::vec2(23, 35), glm::vec2(0.21875, 0.21375), glm::vec2(0.2475, 0.2575));
+	digits[4] = new Quad(glm::vec2(0, 0), glm::vec2(27, 35), glm::vec2(0.26375, 0.21375), glm::vec2(0.2975, 0.2575));
+	digits[5] = new Quad(glm::vec2(0, 0), glm::vec2(24, 35), glm::vec2(0.31125, 0.21375), glm::vec2(0.34125, 0.2575));
+	digits[6] = new Quad(glm::vec2(0, 0), glm::vec2(25, 36), glm::vec2(0.3575, 0.21375), glm::vec2(0.38875, 0.25875));
+	digits[7] = new Quad(glm::vec2(0, 0), glm::vec2(25, 35), glm::vec2(0.40375, 0.21375), glm::vec2(0.435, 0.2575));
+	digits[8] = new Quad(glm::vec2(0, 0), glm::vec2(26, 35), glm::vec2(0.45, 0.21375), glm::vec2(0.4825, 0.2575));
+	digits[9] = new Quad(glm::vec2(0, 0), glm::vec2(24, 35), glm::vec2(0.4975, 0.21375), glm::vec2(0.5275, 0.2575));
+	score = new Number(glm::vec2(-285, 340), 0, digits);
+	timer = new Number(glm::vec2(460, 340), 90, digits);
+}
+void Application::initialiseSound() {
+	engine = irrklang::createIrrKlangDevice();
+	assert(engine, "Could not create sound engine");
+	music = engine->play2D("resources/sounds/warioware.wav", true, false, true);
+	music->setVolume(0.3f);
+	welcomeSound = engine->addSoundSourceFromFile("resources/sounds/welcome.wav");
+	gameOverSound = engine->addSoundSourceFromFile("resources/sounds/game-over.wav");
+	hitSounds[0] = engine->addSoundSourceFromFile("resources/sounds/hit-1.wav");
+	hitSounds[1] = engine->addSoundSourceFromFile("resources/sounds/hit-2.wav");
+	hitSounds[2] = engine->addSoundSourceFromFile("resources/sounds/hit-3.wav");
+	hitSounds[3] = engine->addSoundSourceFromFile("resources/sounds/hit-4.wav");
+	hitSounds[4] = engine->addSoundSourceFromFile("resources/sounds/hit-5.wav");
+	hitSounds[5] = engine->addSoundSourceFromFile("resources/sounds/hit-6.wav");
+	passSounds[0] = engine->addSoundSourceFromFile("resources/sounds/pass-1.wav");
+	passSounds[1] = engine->addSoundSourceFromFile("resources/sounds/pass-2.wav");
+	passSounds[2] = engine->addSoundSourceFromFile("resources/sounds/pass-3.wav");
+	passSounds[3] = engine->addSoundSourceFromFile("resources/sounds/pass-4.wav");
+	passSounds[4] = engine->addSoundSourceFromFile("resources/sounds/pass-5.wav");
+	passSounds[5] = engine->addSoundSourceFromFile("resources/sounds/pass-6.wav");
+	float const fxVolume = 0.6;
+	welcomeSound->setDefaultVolume(fxVolume);
+	gameOverSound->setDefaultVolume(fxVolume);
+	hitSounds[0]->setDefaultVolume(fxVolume);
+	hitSounds[1]->setDefaultVolume(fxVolume);
+	hitSounds[2]->setDefaultVolume(fxVolume);
+	hitSounds[3]->setDefaultVolume(fxVolume);
+	hitSounds[4]->setDefaultVolume(fxVolume);
+	hitSounds[5]->setDefaultVolume(fxVolume);
+	passSounds[0]->setDefaultVolume(fxVolume);
+	passSounds[1]->setDefaultVolume(fxVolume);
+	passSounds[2]->setDefaultVolume(fxVolume);
+	passSounds[3]->setDefaultVolume(fxVolume);
+	passSounds[4]->setDefaultVolume(fxVolume);
+	passSounds[5]->setDefaultVolume(fxVolume);
 }
 void Application::initialiseTextures() {
 	printf("Loading textures\n");
@@ -113,9 +174,37 @@ void Application::initialiseTextures() {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	textureMan->bindTextureToUnit(4, "shadowMap");
+	textureMan->loadTexture("atlas", GL_TEXTURE_2D, "resources/textures/atlas.png");
+	textureMan->bindTextureToUnit(5, "atlas");
+	shaderMan->setUniform("textureSampler", "quad", 4);
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Application* application = (Application*)glfwGetWindowUserPointer(window);
+	if (application->state == TITLE_SCREEN) {
+		if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
+			application->resetCluster();
+			application->state = GAME_SCREEN;
+		}
+	}
+	if (application->state == GAME_SCREEN) {
+		const float PI = glm::pi<float>();
+		if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+			//application->worldRotation.x += glm::radians(10.0f);
+			application->clusterRotationVector.y += glm::radians(90.0f);
+		}
+		if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+			//application->worldRotation.x -= glm::radians(10.0f);
+			application->clusterRotationVector.y += glm::radians(-90.0f);
+		}
+		if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+			//application->worldRotation.y += glm::radians(10.0f);
+			application->clusterRotationVector.x += glm::radians(-90.0f);
+		}
+		if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+			//application->worldRotation.y -= glm::radians(10.0f);
+			application->clusterRotationVector.x += glm::radians(90.0f);
+		}
+	}
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -137,18 +226,6 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
 		application->enableSmoothMoves = !application->enableSmoothMoves;
 	}
-	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		application->worldRotation.x += glm::radians(10.0f);
-	}
-	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-		application->worldRotation.x -= glm::radians(10.0f);
-	}
-	if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-		application->worldRotation.y += glm::radians(10.0f);
-	}
-	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-		application->worldRotation.y -= glm::radians(10.0f);
-	}
 	if (key == GLFW_KEY_HOME && action == GLFW_PRESS) {
 		application->worldRotation = glm::vec2(0, 0);
 	}
@@ -158,50 +235,50 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key == GLFW_KEY_J && action == GLFW_PRESS) {
 		application->clusters[application->currentCluster].scale -= 0.1f;
 	}
-	if (!application->enableSmoothMoves && key == GLFW_KEY_W && action == GLFW_PRESS) {
-		application->clusters[application->currentCluster].position.z += 1.0f;
-	}
-	if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
-		// Rotation occurs if the CAPS LOCK key is currently active.
-		if (mods & GLFW_MOD_CAPS_LOCK) {
-			application->clusters[application->currentCluster].position.x -= 1.0f;
-		}
-		else {
-			switch (application->rotationMode) {
-			case ROTATE_X:
-				application->clusters[application->currentCluster].rotation.x -= glm::radians(5.0f);
-				break;
-			case ROTATE_Y:
-				application->clusters[application->currentCluster].rotation.y -= glm::radians(5.0f);
-				break;
-			case ROTATE_Z:
-				application->clusters[application->currentCluster].rotation.z -= glm::radians(5.0f);
-				break;
-			}
-		}
-	}
-	if (!application->enableSmoothMoves && key == GLFW_KEY_S && action == GLFW_PRESS) {
-		application->clusters[application->currentCluster].position.z -= 1.0f;
-	}
-	if (!application->enableSmoothMoves && key == GLFW_KEY_D && action == GLFW_PRESS) {
-		// Rotation occurs if the CAPS LOCK key is currently active.
-		if (mods & GLFW_MOD_CAPS_LOCK) {
-			application->clusters[application->currentCluster].position.x += 1.0f;
-		}
-		else {
-			switch (application->rotationMode) {
-			case ROTATE_X:
-				application->clusters[application->currentCluster].rotation.x += glm::radians(5.0f);
-				break;
-			case ROTATE_Y:
-				application->clusters[application->currentCluster].rotation.y += glm::radians(5.0f);
-				break;
-			case ROTATE_Z:
-				application->clusters[application->currentCluster].rotation.z += glm::radians(5.0f);
-				break;
-			}
-		}
-	}
+	//if (!application->enableSmoothMoves && key == GLFW_KEY_W && action == GLFW_PRESS) {
+	//	application->clusters[application->currentCluster].position.z += 1.0f;
+	//}
+	//if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
+	//	// Rotation occurs if the CAPS LOCK key is currently active.
+	//	if (mods & GLFW_MOD_CAPS_LOCK) {
+	//		application->clusters[application->currentCluster].position.x -= 1.0f;
+	//	}
+	//	else {
+	//		switch (application->rotationMode) {
+	//		case ROTATE_X:
+	//			application->clusters[application->currentCluster].rotation.x -= glm::radians(5.0f);
+	//			break;
+	//		case ROTATE_Y:
+	//			application->clusters[application->currentCluster].rotation.y -= glm::radians(5.0f);
+	//			break;
+	//		case ROTATE_Z:
+	//			application->clusters[application->currentCluster].rotation.z -= glm::radians(5.0f);
+	//			break;
+	//		}
+	//	}
+	//}
+	//if (!application->enableSmoothMoves && key == GLFW_KEY_S && action == GLFW_PRESS) {
+	//	application->clusters[application->currentCluster].position.z -= 1.0f;
+	//}
+	//if (!application->enableSmoothMoves && key == GLFW_KEY_D && action == GLFW_PRESS) {
+	//	// Rotation occurs if the CAPS LOCK key is currently active.
+	//	if (mods & GLFW_MOD_CAPS_LOCK) {
+	//		application->clusters[application->currentCluster].position.x += 1.0f;
+	//	}
+	//	else {
+	//		switch (application->rotationMode) {
+	//		case ROTATE_X:
+	//			application->clusters[application->currentCluster].rotation.x += glm::radians(5.0f);
+	//			break;
+	//		case ROTATE_Y:
+	//			application->clusters[application->currentCluster].rotation.y += glm::radians(5.0f);
+	//			break;
+	//		case ROTATE_Z:
+	//			application->clusters[application->currentCluster].rotation.z += glm::radians(5.0f);
+	//			break;
+	//		}
+	//	}
+	//}
 	// Because the numerical keys are defined sequentially, this logic can be greatly simplified.
 	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_5 && action == GLFW_PRESS) {
 		application->currentCluster = key - GLFW_KEY_1;
@@ -246,6 +323,10 @@ void Application::handleKeyboard() {
 	if (enableSmoothMoves && glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		clusters[currentCluster].position.z -= speed * scheduler.deltaTime;
 	}
+	clusterSpeed = 120.0f;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		clusterSpeed = 360.0f;
+	}
 }
 void handleWindowResize(GLFWwindow* window, int width, int height) {
 	Application* application = (Application*)glfwGetWindowUserPointer(window);
@@ -282,6 +363,14 @@ void Application::render() {
 	shaderMan->setUniform("textureSampler", "texture", 1);
 	shaderMan->setUniform("specularStrength", "texture", 0.15f);
 	grid->render();
+	shaderMan->setUniform("enableShadows", "texture", false);
+	shaderMan->setUniform("enableTextures", "texture", false);
+	shaderMan->setUniform("specularStrength", "texture", 0.6f);
+	glCullFace(GL_FRONT);
+	model->render(shaderMan, "texture");
+	glCullFace(GL_BACK);
+	shaderMan->setUniform("enableShadows", "texture", enableShadows);
+	shaderMan->setUniform("enableTextures", "texture", enableTextures);
 	for (int i = 0; i < 5; i += 1) {
 		shaderMan->setUniform("textureSampler", "texture", 2);
 		shaderMan->setUniform("specularStrength", "texture", 0.6f);
@@ -300,13 +389,29 @@ void Application::render() {
 	glDisable(GL_DEPTH_TEST);
 	shaderMan->setUniform("color", "basic", glm::vec4(0, 0, 1.0f, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
-	zAxis->render();
+	//zAxis->render();
 	shaderMan->setUniform("color", "basic", glm::vec4(1.0f, 0, 0, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1.0f, 0)));
-	xAxis->render();
+	//xAxis->render();
 	shaderMan->setUniform("color", "basic", glm::vec4(0, 1.0f, 0, 1.0f));
 	shaderMan->setUniform("object", "basic", glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0, 0)));
-	yAxis->render();
+	//yAxis->render();
+	shaderMan->useProgram("quad");
+	switch (state) {
+	case TITLE_SCREEN:
+		hyperCube->render(shaderMan, "quad");
+		getStarted->render(shaderMan, "quad");
+		instructions->render(shaderMan, "quad");
+		break;
+	case LOSS_SCREEN:
+		gameOver->render(shaderMan, "quad");
+	case GAME_SCREEN:
+		_score->render(shaderMan, "quad");
+		_timer->render(shaderMan, "quad");
+		score->render(shaderMan, "quad");
+		timer->render(shaderMan, "quad");
+		break;
+	}
 	glfwSwapBuffers(window);
 	camera->dirty = false;
 }
@@ -324,6 +429,7 @@ void Application::renderShadowMap() {
 
 	shaderMan->setUniform("object", "shadow", glm::mat4(1.0f));
 	grid->render();
+	model->render(shaderMan, "shadow");
 	for (int i = 0; i < 5; i += 1) {
 		clusters[i].render(shaderMan, "shadow");
 		glm::mat4 wallTransform = glm::translate(glm::mat4(1.0f), walls[i]->position);
@@ -337,6 +443,38 @@ void Application::update() {
 	handleMouse();
 	handleKeyboard();
 	camera->update(scheduler.currentTime);
+	if (state == GAME_SCREEN) {
+		moveCluster();
+		clusters[0].rotation = glm::mix(clusters[0].rotation, clusterRotationVector, scheduler.deltaTime * 200.0f);
+		camera->position = clusters[0].position + glm::vec3(0.0f, 4.5f, 10.0f);
+		if (clusters[0].position.z < walls[0]->position.z && !clusterPassedWall) {
+			glm::vec3 normalisedRotationVector = clusterRotationVector;
+			const float PI = glm::pi<float>();
+			while (normalisedRotationVector.x > 2 * PI) {
+				normalisedRotationVector.x -= 2 * PI;
+			}
+			while (normalisedRotationVector.x < 0) {
+				normalisedRotationVector.x += 2 * PI;
+			}
+			while (normalisedRotationVector.y > 2 * PI) {
+				normalisedRotationVector.y -= 2 * PI;
+			}
+			while (normalisedRotationVector.y < 0) {
+				normalisedRotationVector.y += 2 * PI;
+			}
+			bool clusterFitsWall = glm::length(normalisedRotationVector) < 0.1f;
+			if (clusterFitsWall) {
+				score->setValue(score->value + 1);
+				int i = rand() % 6;
+				engine->play2D(passSounds[i]);
+				clusterPassedWall = true;
+			} else {
+				int i = rand() % 6;
+				engine->play2D(hitSounds[i]);
+				resetCluster();
+			}
+		}
+	}
 }
 int main(int argc, char const* argv[]) {
 	// The application was encapsulated in a class to have a simple way to
@@ -345,15 +483,61 @@ int main(int argc, char const* argv[]) {
 	// Indeed, if the termination functions are defined at the end of the main function
 	// then they'll never be executed since the program will exit before they are reached.
 	Application* application = new Application();
+	application->engine->play2D(application->welcomeSound);
 	while (!glfwWindowShouldClose(application->window)) {
 		glfwPollEvents();
 		// The scheduler locks the application to a fixed update interval but 
 		// allows it to run at the maximum possible framerate.
 		if (application->scheduler.shouldUpdate()) application->update();
+		if (application->scheduler.shouldTickSecond() && application->state == GAME_SCREEN) {
+			application->timer->setValue(application->timer->value - 1);
+			if (application->timer->value == 0) {
+				if (application->state != LOSS_SCREEN) {
+					application->engine->play2D(application->gameOverSound);
+					application->music->stop();
+				}
+				application->state = LOSS_SCREEN;
+			}
+		}
+
 		application->renderShadowMap();
 		application->render();
 		application->scheduler.FPS += 1;
 	}
 	delete application;
 	return 0;
+}
+void Application::resetCluster() {
+	clusterPassedWall = false;
+	clusters[0] = Cluster();
+	clusters[0].generateCluster();
+	clusters[0].setPosition(glm::vec3(0, 0, 20));
+	walls[0] = new Wall(&clusters[0], INITIAL_WALL_POSITIONS[0]);
+	clusterSpeed = 10.0f;
+
+	int rotations = rand() % 10;
+	for (int i = 0; i < rotations; i += 1) {
+		switch (rand() % 4) {
+		case 0:
+			clusters[0].rotation.x += glm::radians(-90.0f);
+			break;
+		case 1:
+			clusters[0].rotation.x += glm::radians(90.0f);
+			break;
+		case 2:
+			clusters[0].rotation.y += glm::radians(-90.0f);
+			break;
+		case 3:
+			clusters[0].rotation.y += glm::radians(90.0f);
+			break;
+		}
+	}
+	clusterRotationVector = clusters[0].rotation;
+}
+void Application::moveCluster() {
+	if (clusters[0].position.z > -15.0f) {
+		clusters[0].position += glm::vec3(0.0f, 0.0f, -1.0f * clusterSpeed * scheduler.deltaTime);
+	} else {
+		resetCluster();
+	}
 }
