@@ -82,6 +82,7 @@ public:
 	Quad* hyperCube;
 	Quad* gameOver;
 	Quad* getStarted;
+	Quad* pause;
 	Quad* _score;
 	Quad* _timer;
 	Quad* instructions;
