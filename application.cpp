@@ -176,6 +176,8 @@ void Application::initialiseTextures() {
 	textureMan->bindTextureToUnit(4, "shadowMap");
 	textureMan->loadTexture("atlas", GL_TEXTURE_2D, "resources/textures/atlas.png");
 	textureMan->bindTextureToUnit(5, "atlas");
+	textureMan->loadTexture("space", GL_TEXTURE_2D, "resources/textures/space.jpg");
+	textureMan->bindTextureToUnit(6, "space");
 	shaderMan->setUniform("textureSampler", "quad", 4);
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -205,6 +207,19 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 			application->clusterRotationVector.x += glm::radians(90.0f);
 		}
 	}
+
+	// Pause screen handler
+	if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE) {
+		if (!application->paused) {
+			application->state = PAUSE_SCREEN;
+			application->paused = true;
+		}
+		else {
+			application->state = GAME_SCREEN;
+			application->paused = false;
+		}
+	}
+	
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -382,8 +397,22 @@ void Application::render() {
 		walls[i]->render();
 	}
 
+	// Create the sky cube around the grid
+	glDisable(GL_CULL_FACE);
+	Cube* skyCube = new Cube(glm::vec4(96.0f, 96.0f, 96.0f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+	const glm::mat4 i = glm::mat4(1.0f);
+	glm::mat4 transform =
+		glm::translate(i, glm::vec3(0.0f, 0.0f, 0.0f)) * 
+		glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 100.0f)) *
+		glm::translate(i, skyCube->position);
+	shaderMan->setUniform("object", "texture", transform);
+	shaderMan->setUniform("textureSampler", "texture", 6);
+	skyCube->render();
+	delete skyCube;
+	glEnable(GL_CULL_FACE);
+
 	shaderMan->setUniform("object", "basic", glm::translate(glm::mat4(1.0f), lightCube->position));
-	lightCube->render();
+	//lightCube->render();
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	// The depth test is disabled for the axises to allow them to be drawn ontop of everything else.
 	glDisable(GL_DEPTH_TEST);
@@ -405,6 +434,8 @@ void Application::render() {
 		break;
 	case LOSS_SCREEN:
 		gameOver->render(shaderMan, "quad");
+	case PAUSE_SCREEN:
+		// pause screen text here
 	case GAME_SCREEN:
 		_score->render(shaderMan, "quad");
 		_timer->render(shaderMan, "quad");
